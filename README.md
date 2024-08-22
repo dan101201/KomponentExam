@@ -1,1 +1,1 @@
-# KomponentExam
+# SB4-KOM

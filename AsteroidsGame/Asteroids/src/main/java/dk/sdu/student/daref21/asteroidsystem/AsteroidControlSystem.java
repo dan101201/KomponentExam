@@ -1,0 +1,156 @@
+package dk.sdu.student.daref21.asteroidsystem;
+
+import com.badlogic.gdx.graphics.g3d.particles.influencers.ParticleControllerInfluencer;
+import dk.sdu.student.daref21.common.data.Entity;
+import dk.sdu.student.daref21.common.data.GameData;
+import dk.sdu.student.daref21.common.data.World;
+import dk.sdu.student.daref21.common.data.entityparts.LifePart;
+import dk.sdu.student.daref21.common.data.entityparts.MovingPart;
+import dk.sdu.student.daref21.common.data.entityparts.PositionPart;
+import dk.sdu.student.daref21.common.services.IEntityProcessingService;
+
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.Random;
+
+/**
+ *
+ * @author jcs
+ */
+public class AsteroidControlSystem implements IEntityProcessingService {
+    Random rng = new Random();
+
+    @Override
+    public void process(GameData gameData, World world) {
+        if (rng.nextDouble() < (0.20f * gameData.getDelta())){
+            world.addEntity(createAsteroid(gameData));
+        }
+
+        for (Entity asteroid : world.getEntities(Asteroid.class)) {
+            PositionPart positionPart = asteroid.getPart(PositionPart.class);
+            MovingPart movingPart = asteroid.getPart(MovingPart.class);
+            LifePart lifePart = asteroid.getPart(LifePart.class);
+
+            movingPart.process(gameData, asteroid);
+            positionPart.process(gameData, asteroid);
+
+            if (lifePart != null){
+                lifePart.process(gameData, asteroid);
+                if(lifePart.IsHit()){
+                    for (Asteroid a : splitAsteroid((Asteroid) asteroid)){
+                        world.addEntity(a);
+                    }
+                    world.removeEntity(asteroid);
+                }
+            }
+
+            updateShape(asteroid);
+        }
+    }
+
+    private Asteroid createAsteroid(GameData gameData) {
+        float deceleration = 0;
+        float acceleration = 300000f;
+        float maxSpeed = 100;
+        float rotationSpeed = 3;
+        PositionPart coords = getRandomSpawn(gameData);
+
+        OptionalInt randomSize = rng.ints(1, 3, 9).findAny();
+        Asteroid asteroid = new Asteroid(randomSize.isPresent() ? randomSize.getAsInt() : 8);
+        asteroid.add(new MovingPart(deceleration, acceleration, maxSpeed, rotationSpeed));
+        asteroid.add(coords);
+
+        MovingPart movingPart = asteroid.getPart(MovingPart.class);
+        movingPart.setUp(true);
+
+        asteroid.setShapeX(new float[6]);
+        asteroid.setShapeY(new float[6]);
+
+        asteroid.add(new LifePart((asteroid.getSize() - 1) / 2 ));
+
+        return asteroid;
+    }
+
+    private PositionPart getRandomSpawn(GameData gameData){
+        float x;
+        float y;
+
+        OptionalDouble randomX = rng.doubles(1, 0, gameData.getDisplayWidth()).findAny();
+        OptionalDouble randomY = rng.doubles(1, 0, gameData.getDisplayHeight()).findAny();
+        double randomNumber = rng.nextDouble();
+        if (randomNumber < 0.25){
+            x = 0;
+            y = randomY.isPresent() ? (float)randomY.getAsDouble() : 0;
+        } else if (randomNumber < 0.5){
+            x = randomX.isPresent() ? (float)randomX.getAsDouble() : 0;
+            y = 0;
+        } else if (randomNumber < 0.75){
+            x = gameData.getDisplayWidth();
+            y = randomY.isPresent() ? (float)randomY.getAsDouble() : 0;
+        } else {
+            x = randomX.isPresent() ? (float)randomX.getAsDouble() : 0;
+            y = gameData.getDisplayHeight();
+        }
+
+        OptionalDouble randomRadians = rng.doubles(1, 0, 2 * Math.PI).findAny();
+        float radians = randomRadians.isPresent() ? (float)randomRadians.getAsDouble() : ((float)Math.PI / 2);
+
+        return new PositionPart(x,y,radians);
+    }
+
+    private void updateShape(Entity entity) {
+        float[] shapex = entity.getShapeX();
+        float[] shapey = entity.getShapeY();
+        PositionPart positionPart = entity.getPart(PositionPart.class);
+        float x = positionPart.getX();
+        float y = positionPart.getY();
+        float radians = positionPart.getRadians();
+
+        shapex[0] = (float) (x + Math.cos(radians) * 8);
+        shapey[0] = (float) (y + Math.sin(radians) * 8);
+
+        shapex[1] = (float) (x + Math.cos(radians - 4 * 3.1415f / 5) * 8);
+        shapey[1] = (float) (y + Math.sin(radians - 4 * 3.1145f / 5) * 8);
+
+        shapex[2] = (float) (x + Math.cos(radians + 3.1415f) * 5);
+        shapey[2] = (float) (y + Math.sin(radians + 3.1415f) * 5);
+
+        shapex[3] = (float) (x + Math.cos(radians + 4 * 3.1415f / 5) * 8);
+        shapey[3] = (float) (y + Math.sin(radians + 4 * 3.1415f / 5) * 8);
+
+        entity.setShapeX(shapex);
+        entity.setShapeY(shapey);
+    }
+
+    private Asteroid[] splitAsteroid(Asteroid asteroid){
+        MovingPart movingPart = asteroid.getPart(MovingPart.class);
+        PositionPart coords = asteroid.getPart(PositionPart.class);
+        LifePart lifePart = asteroid.getPart(LifePart.class);
+
+        Asteroid asteroid1 = new Asteroid(asteroid.getSize() / 2);
+        asteroid1.add(movingPart.clone());
+        asteroid1.add(coords.clone());
+        asteroid1.setShapeX(asteroid.getShapeX().clone());
+        asteroid1.setShapeY(asteroid.getShapeY().clone());
+        asteroid1.add(new LifePart(lifePart.getLife() - 1));
+
+        Asteroid asteroid2 = new Asteroid(asteroid.getSize() / 2);
+        asteroid2.add(movingPart.clone());
+        asteroid2.add(coords.clone());
+        asteroid2.setShapeX(asteroid.getShapeX().clone());
+        asteroid2.setShapeY(asteroid.getShapeY().clone());
+        asteroid2.add(new LifePart(lifePart.getLife() - 1));
+
+        PositionPart pos1 = asteroid1.getPart(PositionPart.class);
+        pos1.setRadians(coords.getRadians() - (float) Math.PI / 4);
+
+        PositionPart pos2 = asteroid2.getPart(PositionPart.class);
+        pos2.setRadians(coords.getRadians() + (float) Math.PI / 4);
+
+        Asteroid[] arr = new Asteroid[2];
+        arr[0] = asteroid1;
+        arr[1] = asteroid2;
+        return arr;
+    }
+
+}
