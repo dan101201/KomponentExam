@@ -26,7 +26,7 @@ import static java.lang.Math.sqrt;
  * @author jcs
  */
 public class PlayerControlSystem implements IEntityProcessingService {
-    int shootingCD = 100;
+
     @Override
     public void process(GameData gameData, World world) {
 
@@ -38,15 +38,13 @@ public class PlayerControlSystem implements IEntityProcessingService {
             movingPart.setRight(gameData.getKeys().isDown(RIGHT));
             movingPart.setUp(gameData.getKeys().isDown(UP));
 
-            if (gameData.getKeys().isDown(GameKeys.SPACE) && shootingCD <= 0) {
+            if (gameData.getKeys().isDown(GameKeys.SPACE)) {
                 for (BulletSPI bullet : SPILocator.locateAll(BulletSPI.class)) {
                     world.addEntity(bullet.createBullet(player, gameData));
                 }
-                shootingCD = 100;
                 System.console().printf("space pressed");
             }
-            shootingCD--;
-            
+
             movingPart.process(gameData, player);
             positionPart.process(gameData, player);
 
