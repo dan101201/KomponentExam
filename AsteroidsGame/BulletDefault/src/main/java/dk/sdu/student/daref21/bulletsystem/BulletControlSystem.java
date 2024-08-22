@@ -2,6 +2,7 @@ package dk.sdu.student.daref21.playersystem;
 
 import dk.sdu.student.daref21.common.data.Entity;
 import dk.sdu.student.daref21.common.data.GameData;
+import dk.sdu.student.daref21.common.bullet.BulletSPI;
 import static dk.sdu.student.daref21.common.data.GameKeys.LEFT;
 import static dk.sdu.student.daref21.common.data.GameKeys.RIGHT;
 import static dk.sdu.student.daref21.common.data.GameKeys.UP;

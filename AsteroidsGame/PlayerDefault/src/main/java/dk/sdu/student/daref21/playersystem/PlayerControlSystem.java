@@ -1,5 +1,7 @@
 package dk.sdu.student.daref21.playersystem;
 
+import dk.sdu.student.daref21.common.bullet.BulletSPI;
+
 import dk.sdu.student.daref21.common.data.Entity;
 import dk.sdu.student.daref21.common.data.GameData;
 import static dk.sdu.student.daref21.common.data.GameKeys.LEFT;
@@ -11,6 +13,8 @@ import dk.sdu.student.daref21.common.data.World;
 import dk.sdu.student.daref21.common.data.entityparts.MovingPart;
 import dk.sdu.student.daref21.common.data.entityparts.PositionPart;
 import dk.sdu.student.daref21.common.services.IEntityProcessingService;
+import dk.sdu.student.daref21.common.util.SPILocator;
+
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
@@ -35,8 +39,11 @@ public class PlayerControlSystem implements IEntityProcessingService {
             movingPart.setUp(gameData.getKeys().isDown(UP));
 
             if (gameData.getKeys().isDown(GameKeys.SPACE) && shootingCD <= 0) {
-                //world.addEntity(bullet.createBullet(player, gameData));
+                for (BulletSPI bullet : SPILocator.locateAll(BulletSPI.class)) {
+                    world.addEntity(bullet.createBullet(player, gameData));
+                }
                 shootingCD = 100;
+                System.console().printf("space pressed");
             }
             shootingCD--;
             
