@@ -1,4 +1,4 @@
-package dk.sdu.student.daref21.common.util;
+package dk.sdu.student.daref21.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;

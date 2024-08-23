@@ -13,12 +13,7 @@ import dk.sdu.student.daref21.common.data.World;
 import dk.sdu.student.daref21.common.data.entityparts.MovingPart;
 import dk.sdu.student.daref21.common.data.entityparts.PositionPart;
 import dk.sdu.student.daref21.common.services.IEntityProcessingService;
-import dk.sdu.student.daref21.common.util.SPILocator;
-
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
-import static java.lang.Math.sqrt;
-
+import dk.sdu.student.daref21.playersystem.util.SPILocator;
 
 
 /**

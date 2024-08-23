@@ -1,6 +1,5 @@
 package dk.sdu.student.daref21.asteroidsystem;
 
-import com.badlogic.gdx.graphics.g3d.particles.influencers.ParticleControllerInfluencer;
 import dk.sdu.student.daref21.common.data.Entity;
 import dk.sdu.student.daref21.common.data.GameData;
 import dk.sdu.student.daref21.common.data.World;
@@ -44,7 +43,7 @@ public class AsteroidControlSystem implements IEntityProcessingService {
                 }
             }
 
-            updateShape(asteroid);
+            updateShape((Asteroid)asteroid);
         }
     }
 
@@ -98,30 +97,37 @@ public class AsteroidControlSystem implements IEntityProcessingService {
         return new PositionPart(x,y,radians);
     }
 
-    private void updateShape(Entity entity) {
-        float[] shapex = entity.getShapeX();
-        float[] shapey = entity.getShapeY();
-        PositionPart positionPart = entity.getPart(PositionPart.class);
+    private void updateShape(Asteroid asteroid) {
+        float[] shapex = asteroid.getShapeX();
+        float[] shapey = asteroid.getShapeY();
+        PositionPart positionPart = asteroid.getPart(PositionPart.class);
         float x = positionPart.getX();
         float y = positionPart.getY();
         float radians = positionPart.getRadians();
 
-        shapex[0] = (float) (x + Math.cos(radians) * 8);
-        shapey[0] = (float) (y + Math.sin(radians) * 8);
+        shapex[0] = (float) (x + Math.cos(radians) * asteroid.getScale());
+        shapey[0] = (float) (y + Math.sin(radians) * asteroid.getScale());
 
-        shapex[1] = (float) (x + Math.cos(radians - 4 * 3.1415f / 5) * 8);
-        shapey[1] = (float) (y + Math.sin(radians - 4 * 3.1145f / 5) * 8);
+        shapex[1] = (float) (x + Math.cos(radians - 2 * Math.PI / 6) * asteroid.getScale());
+        shapey[1] = (float) (y + Math.sin(radians - 2 * Math.PI / 6) * asteroid.getScale());
 
-        shapex[2] = (float) (x + Math.cos(radians + 3.1415f) * 5);
-        shapey[2] = (float) (y + Math.sin(radians + 3.1415f) * 5);
+        shapex[2] = (float) (x + Math.cos(radians - 4 * Math.PI / 6) * asteroid.getScale());
+        shapey[2] = (float) (y + Math.sin(radians - 4 * Math.PI / 6) * asteroid.getScale());
 
-        shapex[3] = (float) (x + Math.cos(radians + 4 * 3.1415f / 5) * 8);
-        shapey[3] = (float) (y + Math.sin(radians + 4 * 3.1415f / 5) * 8);
+        shapex[3] = (float) (x + Math.cos(radians + Math.PI) * asteroid.getScale());
+        shapey[3] = (float) (y + Math.sin(radians + Math.PI) * asteroid.getScale());
 
-        entity.setShapeX(shapex);
-        entity.setShapeY(shapey);
+        shapex[4] = (float) (x + Math.cos(radians + 4 * Math.PI / 6) * asteroid.getScale());
+        shapey[4] = (float) (y + Math.sin(radians + 4 * Math.PI / 6) * asteroid.getScale());
+
+        shapex[5] = (float) (x + Math.cos(radians + 2 * Math.PI / 6) * asteroid.getScale());
+        shapey[5] = (float) (y + Math.sin(radians + 2 * Math.PI / 6) * asteroid.getScale());
+
+        asteroid.setShapeX(shapex);
+        asteroid.setShapeY(shapey);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     private Asteroid[] splitAsteroid(Asteroid asteroid){
         MovingPart movingPart = asteroid.getPart(MovingPart.class);
         PositionPart coords = asteroid.getPart(PositionPart.class);

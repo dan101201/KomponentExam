@@ -13,7 +13,7 @@ public class AsteroidPlugin implements IGamePluginService {
     private Entity asteroid;
     private int life;
     private float deacceleration, acceleration, maxSpeed, rotationSpeed;
-    private int shapePointCount;
+    private int shapePointCount = 6;
 
     public AsteroidPlugin() {
     }

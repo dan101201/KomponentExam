@@ -1,4 +1,4 @@
-package dk.sdu.student.daref21.playersystem;
+package dk.sdu.student.daref21.bulletsystem;
 
 import dk.sdu.student.daref21.common.data.Entity;
 import dk.sdu.student.daref21.common.data.GameData;
@@ -7,8 +7,10 @@ import static dk.sdu.student.daref21.common.data.GameKeys.LEFT;
 import static dk.sdu.student.daref21.common.data.GameKeys.RIGHT;
 import static dk.sdu.student.daref21.common.data.GameKeys.UP;
 import dk.sdu.student.daref21.common.data.World;
+import dk.sdu.student.daref21.common.data.entityparts.LifePart;
 import dk.sdu.student.daref21.common.data.entityparts.MovingPart;
 import dk.sdu.student.daref21.common.data.entityparts.PositionPart;
+import dk.sdu.student.daref21.common.data.entityparts.TimerPart;
 import dk.sdu.student.daref21.common.services.IEntityProcessingService;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;

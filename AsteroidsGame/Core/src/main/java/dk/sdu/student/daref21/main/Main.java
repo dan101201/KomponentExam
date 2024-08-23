@@ -1,22 +1,28 @@
 package dk.sdu.student.daref21.main;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class Main {
-	
+
 	public static void main(String[] args) {
-		
-		LwjglApplicationConfiguration cfg =
-			new LwjglApplicationConfiguration();
-		cfg.title = "Asteroids";
-		cfg.width = 500;
-		cfg.height = 400;
-		cfg.useGL30 = false;
-		cfg.resizable = false;
-		
-		new LwjglApplication(new Game(), cfg);
-		
+
+		Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
+		cfg.setTitle("Asteroids");
+		int width = 1800;
+		int height = 1200;
+		cfg.setWindowSizeLimits(width, height, width, height);
+		cfg.setWindowedMode(width, height);
+		cfg.setResizable(false);
+
+		AnnotationConfigApplicationContext application = new AnnotationConfigApplicationContext();
+		application.scan("dk.sdu.student.daref21.main");
+		application.refresh();
+
+		new Lwjgl3Application((ApplicationListener) application.getBean("game"), cfg);
 	}
-	
+
 }

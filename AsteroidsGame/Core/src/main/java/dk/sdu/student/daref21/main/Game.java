@@ -11,27 +11,20 @@ import dk.sdu.student.daref21.common.data.World;
 import dk.sdu.student.daref21.common.services.IEntityProcessingService;
 import dk.sdu.student.daref21.common.services.IGamePluginService;
 import dk.sdu.student.daref21.common.services.IPostEntityProcessingService;
+import dk.sdu.student.daref21.common.services.IPreEntityProcessingService;
 import dk.sdu.student.daref21.managers.GameInputProcessor;
-import dk.sdu.student.daref21.playersystem.PlayerControlSystem;
-import dk.sdu.student.daref21.playersystem.PlayerPlugin;
 
-
-import java.util.ArrayList;
-import java.util.List;
-
-import dk.sdu.student.daref21.common.util.SPILocator;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
-public class Game
-        implements ApplicationListener {
+import dk.sdu.student.daref21.util.SPILocator;
 
-    private static OrthographicCamera cam;
+@Component("game")
+public class Game implements ApplicationListener {
     private ShapeRenderer sr;
 
     private final GameData gameData = new GameData();
-    private List<IEntityProcessingService> entityProcessors = new ArrayList<>();
-    private List<IGamePluginService> entityPlugins = new ArrayList<>();
     private World world = new World();
 
     @Override
@@ -40,7 +33,7 @@ public class Game
         gameData.setDisplayWidth(Gdx.graphics.getWidth());
         gameData.setDisplayHeight(Gdx.graphics.getHeight());
 
-        cam = new OrthographicCamera(gameData.getDisplayWidth(), gameData.getDisplayHeight());
+        OrthographicCamera cam = new OrthographicCamera(gameData.getDisplayWidth(), gameData.getDisplayHeight());
         cam.translate(gameData.getDisplayWidth() / 2, gameData.getDisplayHeight() / 2);
         cam.update();
 
@@ -50,14 +43,15 @@ public class Game
                 new GameInputProcessor(gameData)
         );
 
-        // Create initial objects
-        for (IGamePluginService gamePlugin : getPluginServices()) {
-            gamePlugin.start(gameData, world);
+        // Lookup all Game Plugins using ServiceLoader
+        for (IGamePluginService iGamePluginService : getPluginServices()) {
+            iGamePluginService.start(gameData, world);
         }
     }
 
     @Override
     public void render() {
+        gameData.getKeys().update();
 
         // clear screen to black
         Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -68,11 +62,13 @@ public class Game
         update();
 
         draw();
-
-        gameData.getKeys().update();
     }
 
     private void update() {
+        // Update
+        for (IPreEntityProcessingService preEntityProcessorService : getPreEntityProcessingServices()) {
+            preEntityProcessorService.process(gameData, world);
+        }
         for (IEntityProcessingService entityProcessorService : getEntityProcessingServices()) {
             entityProcessorService.process(gameData, world);
         }
@@ -92,8 +88,8 @@ public class Game
             float[] shapey = entity.getShapeY();
 
             for (int i = 0, j = shapex.length - 1;
-                    i < shapex.length;
-                    j = i++) {
+                 i < shapex.length;
+                 j = i++) {
 
                 sr.line(shapex[i], shapey[i], shapex[j], shapey[j]);
             }
@@ -116,10 +112,17 @@ public class Game
 
     @Override
     public void dispose() {
+        for (IGamePluginService iGamePluginService : getPluginServices()) {
+            iGamePluginService.stop(gameData, world);
+        }
     }
 
     private Collection<? extends IGamePluginService> getPluginServices() {
         return SPILocator.locateAll(IGamePluginService.class);
+    }
+
+    private Collection<? extends IPreEntityProcessingService> getPreEntityProcessingServices() {
+        return SPILocator.locateAll(IPreEntityProcessingService.class);
     }
 
     private Collection<? extends IEntityProcessingService> getEntityProcessingServices() {
