@@ -43,7 +43,6 @@ public class Game implements ApplicationListener {
                 new GameInputProcessor(gameData)
         );
 
-        // Lookup all Game Plugins using ServiceLoader
         for (IGamePluginService iGamePluginService : getPluginServices()) {
             iGamePluginService.start(gameData, world);
         }
